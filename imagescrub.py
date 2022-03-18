@@ -18,7 +18,8 @@ def user_confirm(message):
     sys.stdin = open("/dev/tty")
     answer = ""
     while answer not in ["y", "n"]:
-        answer = input(message).lower()
+        answer = input(Style.BRIGHT + Fore.YELLOW + message).lower()
+    print(Style.RESET_ALL + '', end='')
     return answer == "y"
 
 
@@ -51,11 +52,6 @@ class Main:
                 break
         return lines
 
-    @staticmethod
-    def send_stdout(data):
-        if data is not None:
-            for item in data:
-                print(item)
 
     @staticmethod
     def run():
@@ -89,15 +85,14 @@ class Main:
         for line in lines:
             id = imagetools.parse_image_id(line)
             if id in leaf_node_short_ids:
-                print(Fore.GREEN + Style.BRIGHT + line)
+                print(Fore.GREEN + line)
             elif id in root_node_short_ids:
-                print(Fore.RED + Style.BRIGHT + line)
+                print(Fore.RED + line)
             else:
                 print(Style.RESET_ALL + line)
-
+            
         if options.delete:
             
-
             confirmed = user_confirm("Are you sure you want to delete these images? [y|n]")
             if confirmed:
                 imagetools.delete_images(image_ids)

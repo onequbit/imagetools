@@ -18,9 +18,10 @@ def get_docker_images():
     lines = str(output, 'utf-8').split('\n')
     if len(lines) == 1:
         print("no docker images detected")
-    
-    assert is_docker_images_header(lines[0]), 'unexpected output from "docker images"'
-    return filter(lambda item: item, lines[1:])
+
+    assert is_docker_images_header(lines[0]), f'unexpected output from "docker images": {lines[0]}'
+    result = list(filter(lambda a: len(a)>0, lines))
+    return result
 
 def find_short_id(short_id):
     for image in _docker_client.images.list():
@@ -30,7 +31,7 @@ def find_short_id(short_id):
 
 def parse_image_id(docker_images_str):
     parts = docker_images_str.split()
-    assert len(parts) == 7, 'error parsing output from "docker images"'
+    assert len(parts) >=6, f'error parsing output from "docker images" : {parts}'
     return parts[2]
 
 def get_image_ids(images):
