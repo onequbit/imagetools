@@ -4,7 +4,11 @@ import argparse, json, os, subprocess, sys
 import imagetools
 
 
+from colorama import Fore, Back, Style
 
+# Fore: BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE, RESET.
+# Back: BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE, RESET.
+# Style: DIM, NORMAL, BRIGHT, RESET_ALL
 
 
 
@@ -24,36 +28,20 @@ class Main:
         if data is not None:
             for item in data:
                 print(item)
+    
 
     @staticmethod
-    def run():
-        
-        image_collection_list = imagetools.get_image_collection_list()
-        images = []
-        
-        for image in image_collection_list:
-            image_obj = {}
-            name = '_'.join(image.tags)
-            image_parent = image.attrs['Parent']
-            image_obj[name] = f"parent:{image_parent}" if len(image_parent) > 0 else "None"
-            images.append(image_obj)
-        #     image_obj = dict()
-        #     iagmage_obj['tags'] = image.tags
-        #     parent = image.attrs['parent']
-        #     image_obj['layers'] = layers
-        #     image_ht[image.id] = image_obj
-        
-        # for image in image_ht:
-        #     print(image, '-->')
-        #     for layer in image_ht[image]['layers']:
-        #         print('...', layer)
-        #         if layer in image_ht.keys():
-        #             print(image_ht[layer]['tags'])
-
-        Main.send_stdout(images)
-        
-
+    def run():        
+        images = imagetools.get_lineage()
+                
+        for image in images:
+            if image['node'] is 'root':
+                print(Fore.RED + Style.BRIGHT + str(image))
+            elif image['node'] is 'leaf':
+                print(Fore.GREEN + Style.BRIGHT + str(image))
+            else:
+                print(Style.RESET_ALL + str(image))
 
 if __name__ == '__main__':
     Main.run()
-  
+    print(Style.RESET_ALL)
