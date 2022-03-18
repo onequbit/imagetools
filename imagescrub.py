@@ -22,7 +22,7 @@ class Main:
     def parse_cmd_args(args_to_parse):
         cli = argparse.ArgumentParser(
             prog=(os.path.basename(__file__)),
-            description=" - a tool for mapping the contents of a directory")
+            description=" - a tool for deleting docker images via filters")
         cli.add_argument( '-d', '--delete', action='store_true',
             help="delete the indicated items")
         cli.add_argument(dest='text', nargs='*', default='', type=str, 
@@ -100,9 +100,12 @@ class Main:
 
         if options.delete:
             images_to_delete = imagetools.get_image_ids(lines)
+
             confirmed = user_confirm("Are you sure you want to delete these images? [y|n]")
             if confirmed:
                 imagetools.delete_images(images_to_delete)
+
+                
 if __name__ == '__main__':
     Main.run()
   
