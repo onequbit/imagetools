@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 import argparse, os, subprocess, sys
-
+import imagetools
 
 def user_confirm(message):
     # https://gist.github.com/gurunars/4470c97c916e7b3c4731469c69671d06
@@ -47,33 +47,30 @@ class Main:
             for item in data:
                 print(item)
 
-    @staticmethod
-    def get_docker_images():
-        output = subprocess.run('docker images', capture_output=True, shell=True, check=True).stdout
-        lines = str(output, 'utf-8').split('\n')
-        if len(lines) == 1:
-            print("no docker images detected")
-        headers = lines[0].split()
-        assert headers[0] == 'REPOSITORY', 'unexpected output from "docker images"'
-        return lines[1:]
+    # @staticmethod
+    # def get_docker_images():
+    #     output = subprocess.run('docker images', capture_output=True, shell=True, check=True).stdout
+    #     lines = str(output, 'utf-8').split('\n')
+    #     if len(lines) == 1:
+    #         print("no docker images detected")
+    #     headers = lines[0].split()
+    #     assert headers[0] == 'REPOSITORY', 'unexpected output from "docker images"'
+    #     return lines[1:]
 
-    @staticmethod
-    def get_image_ids(images):
-        results = []
-        for image in images:
-            parts = image.split()
-            results.append(parts[2])
-        return results
+    # @staticmethod
+    # def get_image_ids(images):
+    #     results = []
+    #     for image in images:
+    #         parts = image.split()
+    #         results.append(parts[2])
+    #     return results
 
-    @staticmethod
-    def delete_images(image_ids):
-        # import docker # <-- pip install docker
-        # client = docker.from_env()
-        for id in image_ids:
-            delete_cmd = f"docker image rm --force {id}"
-            output = subprocess.run(delete_cmd, capture_output=True, shell=True, check=True).stdout
-            print(str(output, 'utf-8'))
-            #client.images.remove(image=id)
+    # @staticmethod
+    # def delete_images(image_ids):
+    #     for id in image_ids:
+    #         delete_cmd = f"docker image rm --force {id}"
+    #         output = subprocess.run(delete_cmd, capture_output=True, shell=True, check=True).stdout
+    #         print(str(output, 'utf-8'))
 
     @staticmethod
     def run():
@@ -85,7 +82,7 @@ class Main:
         if pipe_detected:
             lines = Main.read_stdin()
         else:
-            lines = Main.get_docker_images()
+            lines = imagetools.get_docker_images()
 
         if options.text:
             results = set()
@@ -102,10 +99,10 @@ class Main:
         Main.send_stdout(lines)
 
         if options.delete:
-            images_to_delete = Main.get_image_ids(lines)
+            images_to_delete = imagetools.get_image_ids(lines)
             confirmed = user_confirm("Are you sure you want to delete these images? [y|n]")
             if confirmed:
-                Main.delete_images(images_to_delete)
+                imagetools.delete_images(images_to_delete)
 if __name__ == '__main__':
     Main.run()
   
