@@ -2,6 +2,12 @@
 import argparse, os, subprocess, sys
 import imagetools
 
+from colorama import Fore, Back, Style
+
+# Fore: BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE, RESET.
+# Back: BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE, RESET.
+# Style: DIM, NORMAL, BRIGHT, RESET_ALL
+
 def user_confirm(message):
     # https://gist.github.com/gurunars/4470c97c916e7b3c4731469c69671d06
     """
@@ -34,9 +40,13 @@ class Main:
     @staticmethod
     def read_stdin():
         lines = []
+        first_line = input()
+        if not imagetools.is_docker_images_header(first_line):
+            lines.append(first_line)
         while True:
             try:
-                lines.append(input())
+                line = input()          
+                lines.append(line)
             except EOFError:
                 break
         return lines
@@ -46,31 +56,6 @@ class Main:
         if data is not None:
             for item in data:
                 print(item)
-
-    # @staticmethod
-    # def get_docker_images():
-    #     output = subprocess.run('docker images', capture_output=True, shell=True, check=True).stdout
-    #     lines = str(output, 'utf-8').split('\n')
-    #     if len(lines) == 1:
-    #         print("no docker images detected")
-    #     headers = lines[0].split()
-    #     assert headers[0] == 'REPOSITORY', 'unexpected output from "docker images"'
-    #     return lines[1:]
-
-    # @staticmethod
-    # def get_image_ids(images):
-    #     results = []
-    #     for image in images:
-    #         parts = image.split()
-    #         results.append(parts[2])
-    #     return results
-
-    # @staticmethod
-    # def delete_images(image_ids):
-    #     for id in image_ids:
-    #         delete_cmd = f"docker image rm --force {id}"
-    #         output = subprocess.run(delete_cmd, capture_output=True, shell=True, check=True).stdout
-    #         print(str(output, 'utf-8'))
 
     @staticmethod
     def run():
@@ -92,18 +77,30 @@ class Main:
                         results.add(line)
                 lines = list(results)
                 results = set()
-        
-        if options.delete:
-            print("The following images are selected for deletion:")
-        
-        Main.send_stdout(lines)
+
+        image_ids = imagetools.get_image_ids(lines)
+        lineage = imagetools.get_lineage()
+        leaf_node_short_ids = imagetools.get_leaves(lineage)
+        root_node_short_ids = imagetools.get_roots(lineage)
 
         if options.delete:
-            images_to_delete = imagetools.get_image_ids(lines)
+            print("The following images are selected for deletion:")
+
+        for line in lines:
+            id = imagetools.parse_image_id(line)
+            if id in leaf_node_short_ids:
+                print(Fore.GREEN + Style.BRIGHT + line)
+            elif id in root_node_short_ids:
+                print(Fore.RED + Style.BRIGHT + line)
+            else:
+                print(Style.RESET_ALL + line)
+
+        if options.delete:
+            
 
             confirmed = user_confirm("Are you sure you want to delete these images? [y|n]")
             if confirmed:
-                imagetools.delete_images(images_to_delete)
+                imagetools.delete_images(image_ids)
 
                 
 if __name__ == '__main__':

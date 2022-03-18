@@ -35,9 +35,9 @@ class Main:
         images = imagetools.get_lineage()
                 
         for image in images:
-            if image['node'] is 'root':
+            if image['node'] == 'root':
                 print(Fore.RED + Style.BRIGHT + str(image))
-            elif image['node'] is 'leaf':
+            elif image['node'] == 'leaf':
                 print(Fore.GREEN + Style.BRIGHT + str(image))
             else:
                 print(Style.RESET_ALL + str(image))
@@ -45,3 +45,4 @@ class Main:
 if __name__ == '__main__':
     Main.run()
     print(Style.RESET_ALL)
+
